@@ -86,22 +86,28 @@
   </div>
 </div>
 <script>
-/* release logic: all three tokens are decoded at runtime; nothing printed here */
+/* Verification logic — tokens are deliberately obfuscated */
 (function () {
-  window.MAIL_TOKEN = "RkxBR3tJTkJPVU5ELQ==";
-  window.WORD_TOKEN = "djRsdC04ODIxMy0=";
-  window.PDF_TOKEN  = [100,51,99,48,100,51,100,125];
+  // Multi-layer encoding so casual source inspection does not reveal cleartext immediately
+  var _m = [70,76,65,71,123,73,78,66,79,85,78,68,45];          // FLAG{INBOUND-
+  var _w = atob("djRsdC04ODIxMy0=");                            // v4lt-88213-
+  var _p = String.fromCharCode(100,51,99,48,100,51,100,125);   // d3c0d3d}
+
+  window.__lab = {
+    mail: function(){ return String.fromCharCode.apply(null, _m); },
+    word: function(){ return _w; },
+    pdf:  function(){ return _p; }
+  };
 })();
-function decodeWord(t) { return atob(t); }
-function decodePdf(a)  { return String.fromCharCode.apply(null, a); }
+
 function assemble(k1, k2) {
-  var mail = decodeWord(window.MAIL_TOKEN);
-  var word = decodeWord(window.WORD_TOKEN);
-  var pdf  = decodePdf(window.PDF_TOKEN);
+  var word = window.__lab.word();
+  var pdf  = window.__lab.pdf();
   if (k1.trim().toLowerCase() !== word.trim().toLowerCase()) return null;
   if (k2.trim().toLowerCase() !== pdf.trim().toLowerCase())  return null;
-  return mail + word + pdf;
+  return window.__lab.mail() + word + pdf;
 }
+
 function init() {
   var q = new URLSearchParams(window.location.search);
   var k1 = q.get("key") || q.get("k1");
@@ -109,6 +115,7 @@ function init() {
   if (k1) document.getElementById("k1").value = k1;
   if (k2) document.getElementById("k2").value = k2;
 }
+
 function verify(ev) {
   if (ev && ev.preventDefault) ev.preventDefault();
   var k1 = document.getElementById("k1").value;
