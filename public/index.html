@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>FreightDX — Case Portal (Training Replica)</title>
+<style>
+  :root { --brand:#0b3d91; --accent:#1f8f5a; --ink:#22303f; --muted:#6c7a89; --soft:#f2f5f9; }
+  body { margin:0; font-family:system-ui,-apple-system,Calibri,Arial,sans-serif; background:var(--soft); color:var(--ink); }
+  .train-banner { background:#5c4b00; color:#fff3c4; font-size:12px; text-align:center; padding:7px 12px; letter-spacing:.4px; }
+  .wrap { max-width:640px; margin:40px auto; }
+  .card { background:#fff; border:1px solid #dbe2ea; border-radius:10px; overflow:hidden; box-shadow:0 2px 6px rgba(15,30,50,.06); }
+  .brand { background:var(--brand); padding:16px 28px; }
+  .brand .a { color:#fff; font-size:22px; font-weight:700; letter-spacing:1px; }
+  .brand .b { color:#9fd7bb; font-size:22px; font-weight:700; }
+  .brand .sub { color:#bcd2ec; font-size:11px; padding-top:2px; }
+  .body { padding:24px 28px; }
+  h1 { font-size:18px; margin:0 0 6px 0; }
+  p.small { font-size:12px; color:var(--muted); }
+  .banner { background:#eef6f1; border-left:4px solid var(--accent); padding:10px 14px; font-size:13px; color:#17553a; margin:14px 0; }
+  label { display:block; font-size:12px; margin:12px 0 4px 0; font-weight:600; }
+  input[type=text] { width:100%; padding:9px 10px; border:1px solid #bcc7d1; border-radius:5px; font-size:14px; box-sizing:border-box; }
+  button { margin-top:16px; background:var(--brand); color:#fff; border:0; padding:11px 26px; font-size:14px; border-radius:5px; cursor:pointer; }
+  button:hover { background:#08306e; }
+  button:disabled { opacity:.6; cursor:wait; }
+  #verdict { margin-top:14px; font-size:13px; }
+  .err { color:#b3003c; }
+  .ok  { color:var(--accent); font-weight:700; }
+  .flagbox { display:none; margin-top:14px; background:#eafaf1; border:1px solid #bfe8cf; border-left:5px solid var(--accent); padding:12px 14px; font-family:ui-monospace,Consolas,monospace; font-size:14px; color:#0a7a35; word-break:break-all; }
+  .casefile { display:none; margin-top:10px; border:1px dashed #c9c9d6; padding:14px; border-radius:6px; background:#fafafc; }
+  .casefile h3 { margin:0 0 8px 0; font-size:13px; color:var(--brand); }
+  .casefile li { font-size:12px; margin:3px 0; }
+  details { margin-top:16px; font-size:12px; color:#55556e; }
+  summary { cursor:pointer; }
+  footer { font-size:11px; color:var(--muted); padding:12px 28px; border-top:1px solid #dbe2ea; background:#fafbfc; }
+</style>
+</head>
+<body>
+<div class="train-banner">TRAINING REPLICA — public lab CTF endpoint. Not affiliated with any real courier or logistics brand.</div>
+<div class="wrap">
+  <div class="card">
+    <div class="brand">
+      <span class="a">Freight</span><span class="b">DX</span>
+      <div class="sub">Case Portal &mdash; lab exercise HQ</div>
+    </div>
+    <div class="body">
+      <h1>Verify case 7465-2236-9012</h1>
+      <p class="small">Enter the three reference codes exactly as issued within your
+      protected shipment documents and campaign intel.</p>
+      <div class="banner">Case hold: the case file for this case ID is encrypted. Enter the
+      <b>document access key</b>, the <b>case reference suffix</b> and the
+      <b>campaign fragment</b> exactly as recovered.</div>
+
+      <form id="f" onsubmit="return verify(event)" novalidate>
+        <label for="k1">Document access key</label>
+        <input type="text" id="k1" name="key" placeholder="document access key" autocomplete="off">
+        <label for="k2">Case reference suffix</label>
+        <input type="text" id="k2" name="ref" placeholder="case reference suffix" autocomplete="off">
+        <label for="k3">Campaign fragment</label>
+        <input type="text" id="k3" name="osint" placeholder="campaign fragment" autocomplete="off">
+        <button type="submit" id="btn">Release case file</button>
+      </form>
+      <div id="verdict"></div>
+      <div id="flagbox" class="flagbox"></div>
+      <div id="casefile" class="casefile">
+        <h3>Case file released</h3>
+        <ul>
+          <li>Case: 7465-2236-9012</li>
+          <li>Type: lab exercise &mdash; inert artefact chain</li>
+          <li>Stage: final assembly (flag released)</li>
+        </ul>
+        <p style="font-size:11px;color:var(--muted);margin:8px 0 0 0;">
+        Verification is performed server-side. No reference codes are embedded in this page.</p>
+      </div>
+
+      <details>
+        <summary>Problem verifying your codes?</summary>
+        <p>If your documents were not delivered with this notification, reply to the
+        sender with your case reference so they can be re-issued.</p>
+      </details>
+      <noscript><p style="color:#b3003c;">JavaScript is disabled - the portal cannot verify codes.</p></noscript>
+    </div>
+    <footer>
+      FreightDX lab HQ &bull; public CTF training replica &bull; server-side verify
+    </footer>
+  </div>
+</div>
+<script>
+function init() {
+  var q = new URLSearchParams(window.location.search);
+  var k1 = q.get("key") || q.get("k1");
+  var k2 = q.get("ref") || q.get("k2");
+  var k3 = q.get("osint") || q.get("k3");
+  if (k1) document.getElementById("k1").value = k1;
+  if (k2) document.getElementById("k2").value = k2;
+  if (k3) document.getElementById("k3").value = k3;
+}
+
+function verify(ev) {
+  if (ev && ev.preventDefault) ev.preventDefault();
+  var btn = document.getElementById("btn");
+  var d  = document.getElementById("verdict");
+  var bx = document.getElementById("flagbox");
+  var cf = document.getElementById("casefile");
+  var k1 = document.getElementById("k1").value;
+  var k2 = document.getElementById("k2").value;
+  var k3 = document.getElementById("k3").value;
+
+  btn.disabled = true;
+  d.className = "";
+  d.textContent = "Verifying…";
+  bx.style.display = "none";
+  cf.style.display = "none";
+
+  fetch("/api/verify", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ k1: k1, k2: k2, k3: k3 })
+  })
+    .then(function (r) { return r.json().then(function (j) { return { status: r.status, body: j }; }); })
+    .then(function (res) {
+      if (res.body && res.body.ok && res.body.flag) {
+        d.className = "ok";
+        d.textContent = res.body.message || "Verification passed - case file released.";
+        bx.style.display = "block";
+        bx.textContent = res.body.flag;
+        cf.style.display = "block";
+      } else {
+        d.className = "err";
+        d.textContent = (res.body && res.body.error) || "Verification failed - one or more reference codes are incorrect.";
+        bx.style.display = "none";
+        cf.style.display = "none";
+      }
+    })
+    .catch(function () {
+      d.className = "err";
+      d.textContent = "Verification service unavailable. Redeploy with /api/verify enabled.";
+      bx.style.display = "none";
+      cf.style.display = "none";
+    })
+    .finally(function () { btn.disabled = false; });
+
+  return false;
+}
+
+document.addEventListener("DOMContentLoaded", init);
+</script>
+</body>
+</html>
