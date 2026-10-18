@@ -23,6 +23,7 @@
   input[type=text] { width:100%; padding:9px 10px; border:1px solid #bcc7d1; border-radius:5px; font-size:14px; box-sizing:border-box; }
   button { margin-top:16px; background:var(--brand); color:#fff; border:0; padding:11px 26px; font-size:14px; border-radius:5px; cursor:pointer; }
   button:hover { background:#08306e; }
+  button:disabled { opacity:.6; cursor:wait; }
   #verdict { margin-top:14px; font-size:13px; }
   .err { color:#b3003c; }
   .ok  { color:var(--accent); font-weight:700; }
@@ -59,7 +60,7 @@
         <input type="text" id="k2" name="ref" placeholder="case reference suffix" autocomplete="off">
         <label for="k3">Campaign fragment</label>
         <input type="text" id="k3" name="osint" placeholder="campaign fragment" autocomplete="off">
-        <button type="submit">Release case file</button>
+        <button type="submit" id="btn">Release case file</button>
       </form>
       <div id="verdict"></div>
       <div id="flagbox" class="flagbox"></div>
@@ -71,8 +72,7 @@
           <li>Stage: final assembly (flag released)</li>
         </ul>
         <p style="font-size:11px;color:var(--muted);margin:8px 0 0 0;">
-        This is a training endpoint. All behaviour is client-side JavaScript; no data
-        is uploaded, stored, or forwarded.</p>
+        Verification is performed server-side. No reference codes are embedded in this page.</p>
       </div>
 
       <details>
@@ -83,32 +83,12 @@
       <noscript><p style="color:#b3003c;">JavaScript is disabled - the portal cannot verify codes.</p></noscript>
     </div>
     <footer>
-      FreightDX lab HQ &bull; public CTF training replica &bull; loopback-free build
+      FreightDX lab HQ &bull; public CTF training replica &bull; server-side verify
     </footer>
   </div>
 </div>
 <script>
-/* release logic: all tokens are decoded at runtime; nothing printed in clear */
-(function () {
-  window.MAIL_TOKEN = "RkxBR3tGUjgt";
-  window.WORD_TOKEN = [70,31,26,71,76,19,95,24,6];
-  window.PDF_TOKEN  = "LTc4UUwtbGwzaHM=";
-  window.OSIN_TOKEN = [112,114,48,120,121,45,100,51,52,100,125];
-})();
-function decodeWord(a) { return String.fromCharCode.apply(null, a.map(function (c) { return c ^ 43; })); }
-function decodePdf(t)  { return atob(t).split("").reverse().join(""); }
-function decodeOsint(a){ return String.fromCharCode.apply(null, a); }
-function assemble(k1, k2, k3) {
-  var mail = atob(window.MAIL_TOKEN);
-  var word = decodeWord(window.WORD_TOKEN);
-  var pdf  = decodePdf(window.PDF_TOKEN);
-  var osin = decodeOsint(window.OSIN_TOKEN);
-  var nrm  = function (s) { return String(s).trim().toLowerCase(); };
-  if (nrm(k1) !== nrm(word)) return null;
-  if (nrm(k2) !== nrm(pdf))  return null;
-  if (nrm(k3) !== nrm(osin)) return null;
-  return mail + word + pdf + osin;
-}
+/* Client has no answer tokens. Verification goes to /api/verify */
 function init() {
   var q = new URLSearchParams(window.location.search);
   var k1 = q.get("key") || q.get("k1");
@@ -118,29 +98,54 @@ function init() {
   if (k2) document.getElementById("k2").value = k2;
   if (k3) document.getElementById("k3").value = k3;
 }
+
 function verify(ev) {
   if (ev && ev.preventDefault) ev.preventDefault();
-  var k1 = document.getElementById("k1").value;
-  var k2 = document.getElementById("k2").value;
-  var k3 = document.getElementById("k3").value;
-  var v  = assemble(k1, k2, k3);
+  var btn = document.getElementById("btn");
   var d  = document.getElementById("verdict");
   var bx = document.getElementById("flagbox");
   var cf = document.getElementById("casefile");
-  if (v === null) {
-    d.className = "err";
-    d.textContent = "Verification failed - one or more reference codes are incorrect.";
-    bx.style.display = "none";
-    cf.style.display = "none";
-  } else {
-    d.className = "ok";
-    d.textContent = "Verification passed - case file released.";
-    bx.style.display = "block";
-    bx.textContent = v;
-    cf.style.display = "block";
-  }
+  var k1 = document.getElementById("k1").value;
+  var k2 = document.getElementById("k2").value;
+  var k3 = document.getElementById("k3").value;
+
+  btn.disabled = true;
+  d.className = "";
+  d.textContent = "Verifying…";
+  bx.style.display = "none";
+  cf.style.display = "none";
+
+  fetch("/api/verify", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ k1: k1, k2: k2, k3: k3 })
+  })
+    .then(function (r) { return r.json().then(function (j) { return { status: r.status, body: j }; }); })
+    .then(function (res) {
+      if (res.body && res.body.ok && res.body.flag) {
+        d.className = "ok";
+        d.textContent = res.body.message || "Verification passed - case file released.";
+        bx.style.display = "block";
+        bx.textContent = res.body.flag;
+        cf.style.display = "block";
+      } else {
+        d.className = "err";
+        d.textContent = (res.body && res.body.error) || "Verification failed - one or more reference codes are incorrect.";
+        bx.style.display = "none";
+        cf.style.display = "none";
+      }
+    })
+    .catch(function () {
+      d.className = "err";
+      d.textContent = "Verification service unavailable. Redeploy with /api/verify enabled.";
+      bx.style.display = "none";
+      cf.style.display = "none";
+    })
+    .finally(function () { btn.disabled = false; });
+
   return false;
 }
+
 document.addEventListener("DOMContentLoaded", init);
 </script>
 </body>
