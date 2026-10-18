@@ -48,6 +48,10 @@ Email-PhishingLab/
     └── vercel.json                    static config + noindex headers
 ```
 
+> The repo also keeps byte-identical `public/index.html` and `api/verify.js`
+> copies at the repository root, so Vercel can build from the repo root without
+> a Root Directory override. Keep the pairs in sync when editing.
+
 > The **instructor pack** (flag scheme, answer key, walkthrough, IOC list, OSINT
 > snapshot, decoded mail map) is NOT part of this public edition. This repo is
 > deliberately official — instructors distribute the answer key separately.
@@ -149,8 +153,8 @@ Email-PhishingLab/
 | `artifacts/web/image015.png` | `c000009daa8da04bd5d051e51c53cc05951f2ff32144a2cf5a7c3405910af99c` |
 | `artifacts/web/FedEx_Tracking_Portal.html` | `f8d0d72126ab7f4b9388dff49d447237adec410f2da5c1a34a17f9a5c910f870` |
 | `artifacts/web/inbound_message_body.html` | `1732c542a78df0ba652a5967ea68812afcd7794eaca2f3bc6ed0f8eb20f5ce2b` |
-| `deploy/public/index.html` | `2dbfe9d76f4ddac81d42def46e7788fbf96a6f1ece33ff404f9638ceca4ed8eb` |
-| `deploy/api/verify.js` | `c33e36001788ff53e08294068cc66c538882acd4c872c2583d04bd33a011200c` |
+| `deploy/public/index.html` (and root `public/index.html` mirror) | `5f32e74e01992e309a1fbac9e617d6d486effe70c396e21878d5683cda8eabc4` |
+| `deploy/api/verify.js` (and root `api/verify.js` mirror) | `fe76eb1089716b48aaa1521989706249694b632666e4dadca3ddadc944776862` |
 
 ## Safety summary (see SAFETY.md for the full model)
 
