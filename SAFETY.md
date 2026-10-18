@@ -42,7 +42,9 @@ a real sample — and they are listed defanged in the instructor IOC list. Rules
 
 - They are **analysis artefacts only**: never contacted, never resolved as part
   of the lab flow.
-- The lab is fully solvable **offline**; no step requires reaching any of them.
+- The lab is fully solvable **offline** — no step requires reaching any of them;
+  the artefact chain needs no network, and the single OSINT step (fragment C)
+  runs on the instructor-provided offline snapshot of a public threat note.
 - If you detonate anything anyway, do it in a **disposable VM with no outbound
   networking** and a snapshot taken.
 

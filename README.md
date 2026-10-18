@@ -9,9 +9,13 @@ malware, no working downloader, no real C2, no persistence. See `SAFETY.md`.
 The **IOC IPs/domains in the mail chain are real malspam entities with public reputation**
 on sandboxes and threat-intel feeds (Open Threat Exchange / CAPE Sandbox tagged
 `142.132.180.233`, `37.0.11.227`, `104.200.23.95`) so analysts pivot on genuine
-indicators, as they would in real triage. They must **never be contacted live**; the lab
-is a 100% offline exercise, and the one OSINT step points at a public, archival note —
-never at attacker infrastructure.
+indicators, as they would in real triage. They must **never be contacted live**;
+the artefact chain is a 100% offline exercise, and the one OSINT step points at a
+public, archival note — never at attacker infrastructure. Note that **these IOCs
+will age out of reputation feeds**: malspam infrastructure decays, verdicts drop
+off sandboxes/OTX dashboards, and blocklists expire. Treat the pivot exercise
+(Q4, Q12–Q13, Q14) as time-sensitive — if an indicator no longer appears on a
+feed, grade it from the instructor IOC list rather than re-pivoting live.
 
 > **Do not run anything on your own workstation** — treat all samples as you would in a
 > real triage: isolated VM, snapshots off, no outbound networking.
@@ -22,7 +26,7 @@ never at attacker infrastructure.
 Email-PhishingLab/
 ├── README.md                         you are here
 ├── SAFETY.md                         inert guarantees + handling rules
-├── short-answer-questions.md         16 core + 4 bonus short-answer questions
+├── short-answer-questions.md         16 core + 5 bonus short-answer questions
 ├── mail/
 │   └── eml/
 │       ├── inbound_message.eml       THE mail source to analyse (styled phishing body)
@@ -40,6 +44,7 @@ Email-PhishingLab/
 │       └── FedEx_AWB_public.zip              decoy, no password
 └── deploy/                            the final verification portal (public build)
     ├── public/index.html              de-branded "FreightDX" case portal (3 codes)
+    ├── api/verify.js                  serverless verify endpoint (hash-only comparison)
     └── vercel.json                    static config + noindex headers
 ```
 
@@ -75,7 +80,9 @@ Email-PhishingLab/
 1. **Read the mail source raw.** Open `mail/eml/inbound_message.eml` as text
    (Notepad++, Thunderbird "View -> Message Source", CyberChef).
 2. **Decode everything:**
-   - `Subject`/`From`/`To` are `=?UTF-8?B?...?=`;
+   - `Subject` is fully RFC2047-B encoded (`=?UTF-8?B?...?=`); the `From` and
+     `To` display names are encoded the same way (the bare address after
+     `<>` stays plain, which is normal RFC behaviour);
    - both body parts (`text/plain`, `text/html`) are base64;
    - `X-Beacon-Ref` and `X-Panel-Ref` are base64-wrapped URLs.
 3. **Extract attachments:** the password-protected ZIP, and the inline PNG pixel.
@@ -94,8 +101,12 @@ Email-PhishingLab/
 7. **Tracking pixel:** decode the PNG's two `tEXt` chunks (Comment = **fragment 0**;
    Pipeline = the campaign token again — confirming the OSINT target).
 8. **OSINT step:** use the campaign token to find the public threat note about this
-   campaign (your instructor documents how the token is published/archived; an
-   offline snapshot exists). The note contains **fragment C**.
+   campaign (your instructor documents how the token is published/archived and
+   distributes an offline snapshot of the note with the instructor pack).
+   This is the **only step that is not solvable from the artefacts alone** —
+   solo trainees need the instructor's snapshot (or access to the public
+   archive); without it Q15 cannot be answered. The note contains
+   **fragment C**.
 9. **Verification portal:** open `deploy/public/index.html` (or the offline twin)
    and enter fragment 1, fragment 2 and fragment C. The portal assembles and
    releases the master flag. URL autofill: `?key=...&ref=...&osint=...`.
@@ -139,6 +150,7 @@ Email-PhishingLab/
 | `artifacts/web/FedEx_Tracking_Portal.html` | `f8d0d72126ab7f4b9388dff49d447237adec410f2da5c1a34a17f9a5c910f870` |
 | `artifacts/web/inbound_message_body.html` | `1732c542a78df0ba652a5967ea68812afcd7794eaca2f3bc6ed0f8eb20f5ce2b` |
 | `deploy/public/index.html` | `2dbfe9d76f4ddac81d42def46e7788fbf96a6f1ece33ff404f9638ceca4ed8eb` |
+| `deploy/api/verify.js` | `c33e36001788ff53e08294068cc66c538882acd4c872c2583d04bd33a011200c` |
 
 ## Safety summary (see SAFETY.md for the full model)
 
@@ -146,4 +158,4 @@ Email-PhishingLab/
 * The VBA `-enc` stage-2 only *reconstructs strings* and `Write-Output`s one of them; never executes downloads, drops files, or touches the registry/network.
 * The PDF JavaScript only re-assembles strings and shows an alert; its `/URI` annotation is never fetched.
 * All network indicators are offline-analysis-only; the OSINT fragment lives in a public/archivable instructor note, not on attacker infrastructure.
-* `deploy/public/index.html` verification is client-side only; nothing is uploaded.
+* `deploy/public/index.html` sends the three codes to the serverless `/api/verify` endpoint for checking (the page itself embeds no answer tokens); the offline twin `artifacts/web/FedEx_Tracking_Portal.html` is local JS only and never contacts the network.

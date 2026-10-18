@@ -55,8 +55,10 @@ Assemble the fragments concatenated inside `q2` of the decoded PDF JavaScript
 exact string, including the trailing hyphen.
 
 ## Q12 — First hop IP (1 IP)
-The very first (topmost, recipient-added) `Received:` header mentions a source
-server IP in brackets. What is it? Answer format: IPv4 address only.
+The **topmost** `Received:` header — the first one in the file, i.e. the line at
+the very top of the header block, added last by the recipient-side hop — mentions
+a source server IP in brackets. The lower `Received:` hops list other IPs; only
+the topmost header counts. What is it? Answer format: IPv4 address only.
 
 ## Q13 — Originating IP (1 IP)
 What is the value of the `X-Originating-IP:` header? Answer format: IPv4
@@ -71,7 +73,9 @@ The pipeline token (Q7) is the campaign identifier. The OSINT step uses it to
 reveal the last fragment of the master flag. What is the exact OSINT-derived
 fragment? Answer format: exact string, including the trailing brace if present.
 Hint: your instructor explains where the token leads (public threat note /
-archive snapshot).
+archive snapshot) and distributes an offline snapshot of that note with the
+instructor pack. This is the only step that cannot be completed from the
+artefacts alone.
 
 ## Q16 — Master flag (1 string)
 Open `deploy/public/index.html`, enter the three codes you recovered (the Word-doc
@@ -98,3 +102,10 @@ Answer format: host/domain only.
 What is the SHA256 of the password-protected archive `FedEx_AWB_7465-2236-9012.zip`
 (the file as distributed in `artifacts/archived/`, not the hash of its inner
 members)? Answer format: full lowercase hex hash.
+
+## Q21 — Document author metadata (1 string)
+Real triage checks OOXML metadata hygiene. Open `docProps/core.xml` inside the
+docm package (7-Zip / CyberChef "Extract Files" — no Office needed): the
+`dc:creator` and `cp:lastModifiedBy` properties record the same author name,
+with creation/modification timestamps. What is the exact name recorded?
+Answer format: exact name as stored in `core.xml`.
