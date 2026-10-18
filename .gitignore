@@ -26,6 +26,10 @@ deploy/README.md
 deploy/.vercel/
 lab-evidence/
 
+# ---- OSINT mirror (public recovery via web archive only; not in trainee tree)
+artifacts/intel/
+artifacts/intel/PFX-81LQ-C554_threat_note.md
+
 # ---- editor / OS litter
 Thumbs.db
 desktop.ini
