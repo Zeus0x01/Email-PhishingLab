@@ -1,0 +1,10 @@
+# freeze analysis artefacts byte-exact (no line-ending conversion ever)
+*.eml   -text
+*.docm  -text
+*.pdf   -text
+*.zip   -text
+*.png   -text
+*.jpg   -text
+*.bin   -text
+*.doc   -text
+*.docx  -text
