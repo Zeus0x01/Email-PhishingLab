@@ -1,89 +1,100 @@
 # short-answer-questions.md
 
-One line per question — a single short, exact answer (IP / URL / header / string).  
-No explanations. Case-insensitive; leading/trailing spaces ignored.  
+One line per question — a single short, exact answer (IP / URL / header / string).
+No explanations. Case-insensitive; leading/trailing spaces ignored.
 Format hint in parentheses on each line.
 
----
-
 ## Q1 — Subject (1 string)
-Decode the RFC 2047 `Subject` header of `mail/eml/inbound_message.eml`.  
+Decode the RFC 2047 `Subject` header of `mail/eml/inbound_message.eml`.
 Answer format: exact decoded subject text.
 
 ## Q2 — Reply-To address (1 email address)
-What is the exact `Reply-To` (and identical `Resent-Reply-To`) address in `inbound_message.eml`?  
-Answer format: full email address.
+What is the exact `Reply-To` (and identical `Resent-Reply-To`) address in
+`inbound_message.eml`? Answer format: full email address.
 
 ## Q3 — Envelope domain (1 domain)
-Which domain does the `Return-Path` / `From` envelope use (the part after `@`)?  
+Which domain does the `Return-Path`/`From` envelope use (the part after `@`)?
 Answer format: domain only.
 
 ## Q4 — X-Beacon-Ref URL (1 URL)
-`X-Beacon-Ref:` is a base64-wrapped value. What is the exact decoded URL?  
+`X-Beacon-Ref:` is a base64-wrapped value. What is the exact decoded URL?
 Answer format: full URL, no trailing spaces.
 
 ## Q5 — ZIP password (1 token)
-What is the password protecting the attached archive `FedEx_AWB_7465-2236-9012.zip`?  
-(Recoverable from the decoded mail body.)  
+What is the password protecting the attached archive `FedEx_AWB_7465-2236-9012.zip`?
 Answer format: password only.
 
-## Q6 — Pixel flag part 1 (1 string)
-Decode the inline `image015.png` MIME part; a `tEXt/Comment` chunk carries flag part 1.  
-What is the exact string?  
-Answer format: exact chunk value, including the trailing hyphen if present.
+## Q6 — Pixel flag part 0 (1 string)
+Decode the inline `image015.png` MIME part; a `tEXt` chunk keyed `Comment` carries
+flag part 0. What is the exact string? Answer format: exact chunk value, including
+the trailing hyphen if present.
 
-## Q7 — Macro reference code (1 string)
-Inside `FedEx_WayBill_7465-2236-9012.docm`, the VBA `-enc` PowerShell blob decodes (UTF-16LE) to a small payload whose first line assigns `$flag`.  
-What is the exact decoded flag value?  
-Answer format: exact string.
+## Q7 — Pipeline token (1 token)
+A second `tEXt` chunk (`Pipeline`), the base64 `Comments` property / hardcoded
+channel inside the `.docm`, the decoded PowerShell stage-2, the decoded PDF JS and
+the `X-Panel-Ref` header all reveal the same unique campaign identifier. What is it?
+Answer format: exact token.
 
-## Q8 — PDF obfuscation filter (1 token)
-The `/OpenAction` of `FedEx_WayBill_7465-2236-9012.pdf` points to a stream whose `/Filter` is what?  
-Answer format: name after the `/Filter` `/` (single token).
+## Q8 — Macro reference code (1 string)
+Inside `FedEx_WayBill_7465-2236-9012.docm`, the VBA `-enc` PowerShell blob decodes
+(UTF-16LE) to a small payload whose first line assigns `$flag`. What is the exact
+decoded value? Answer format: exact string, including the trailing hyphen.
 
-## Q9 — Red-herring URL (1 URL)
-The decoded PDF JavaScript contains a `dead2` string — a URL an analyst might mistake for the real beacon.  
-What is the exact URL?  
-Answer format: full URL.
+## Q9 — PDF filter chain (2 tokens in order)
+The `/OpenAction` of `FedEx_WayBill_7465-2236-9012.pdf` points to a stream with a
+TWO-step `/Filter [ ... ]`. Name BOTH filters in the order they are applied when
+decoding the stream. Answer format: comma-separated tokens, e.g. `A, B`.
 
-## Q10 — PDF flag part 3 (1 string)
-Assemble the four concatenated fragments assigned to `p2` inside the decoded PDF JavaScript.  
-What is the exact value?  
-Answer format: exact string, including the trailing brace if present.
+## Q10 — Red-herring URL (1 URL)
+The decoded PDF JavaScript contains a `dead2` string — a URL an analyst might
+mistake for the real beacon. What is the exact URL? Answer format: full URL.
 
-## Q11 — First hop IP (1 IP)
-The very first (topmost, recipient-added) `Received:` header mentions a source server IP in brackets.  
-What is it?  
-Answer format: IPv4 address only.
+## Q11 — PDF flag part 2 (1 string)
+Assemble the fragments concatenated inside `q2` of the decoded PDF JavaScript
+(the `s4` function joins them into `p2`). What is the exact value? Answer format:
+exact string, including the trailing hyphen.
 
-## Q12 — Originating IP (1 IP)
-What is the value of the `X-Originating-IP:` header?  
-Answer format: IPv4 address only (brackets optional).
+## Q12 — First hop IP (1 IP)
+The very first (topmost, recipient-added) `Received:` header mentions a source
+server IP in brackets. What is it? Answer format: IPv4 address only.
 
-## Q13 — Decoy domain (1 domain)
-`outbound_decoy.eml` links out to a different domain than the main campaign chain.  
-Which one?  
-Answer format: domain only.
+## Q13 — Originating IP (1 IP)
+What is the value of the `X-Originating-IP:` header? Answer format: IPv4
+address only (brackets optional).
 
-## Q14 — Master flag (1 string)
-Open `deploy/public/index.html`, enter the two reference codes you recovered (the Word-doc key from Q7 and the PDF reference from Q10).  
-What exact string does the portal release?  
-Answer format: the assembled master flag.
+## Q14 — Decoy domain (1 domain)
+`outbound_decoy.eml` links out to a domain outside the main campaign chain.
+Which one? Answer format: domain only.
+
+## Q15 — OSINT flag fragment (1 string)
+The pipeline token (Q7) is the campaign identifier. The OSINT step uses it to
+reveal the last fragment of the master flag. What is the exact OSINT-derived
+fragment? Answer format: exact string, including the trailing brace if present.
+Hint: your instructor explains where the token leads (public threat note /
+archive snapshot).
+
+## Q16 — Master flag (1 string)
+Open `deploy/public/index.html`, enter the three codes you recovered (the Word-doc
+key from Q8, the PDF fragment from Q11 and the OSINT fragment from Q15). What exact
+string does the portal release? Answer format: the assembled master flag.
+Worth double points.
 
 ---
 
-## Additional recommended questions (optional / bonus)
+## Bonus questions (extra credit)
 
-These are not required for the core flag but strengthen the report:
+## Q17 — DKIM domain (1 domain)
+The `DKIM-Signature:` line carries `d=...`. Which signing domain is claimed?
+Answer format: domain only.
 
-**B1 — DKIM domain**  
-Which domain appears in the `DKIM-Signature` `d=` tag? (even though verification failed)
+## Q18 — X-Mailer (1 string)
+What is the exact `X-Mailer:` header value? Answer format: exact string.
 
-**B2 — X-Mailer**  
-What is the exact value of the `X-Mailer` header?
+## Q19 — Message-ID host (1 domain)
+The `Message-ID:` right-hand side (after `@`) belongs to which host?
+Answer format: host/domain only.
 
-**B3 — Message-ID host**  
-What hostname appears after the `@` in the `Message-ID`?
-
-**B4 — Attachment SHA-256**  
-What is the SHA-256 of `FedEx_WayBill_7465-2236-9012.docm`? (see README hashes section)
+## Q20 — Attachment SHA256 (1 hash)
+What is the SHA256 of the password-protected archive `FedEx_AWB_7465-2236-9012.zip`
+(the file as distributed in `artifacts/archived/`, not the hash of its inner
+members)? Answer format: full lowercase hex hash.

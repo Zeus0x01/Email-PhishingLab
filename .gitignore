@@ -1,4 +1,5 @@
 # ---- INSTRUCTOR-ONLY (contains the answer key, flag parts, or exact build steps)
+instructor/
 answers.md
 lab-walkthrough.md
 IOC_LIST.md
@@ -8,19 +9,22 @@ sources/build_docm.ps1
 sources/build_eml.py
 sources/build_pdf.py
 sources/build_png.py
+sources/build_zip.ps1
 sources/serve_portal.py
 sources/start_portal.ps1
 sources/pdf-source.txt
 sources/track_pixel.png
+sources/seed-shell.docm
 sources/decoded-mail-source.md
 sources/mail-source-decoded.md
-sources/REBUILD.md
 sources/references.txt
 sources/FedEx Express International.docx
 sources/*.vbs
 sources/*.bak
+prompt.md
 deploy/README.md
 deploy/.vercel/
+lab-evidence/
 
 # ---- editor / OS litter
 Thumbs.db

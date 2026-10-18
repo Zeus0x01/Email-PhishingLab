@@ -41,17 +41,19 @@
     </div>
     <div class="body">
       <h1>Verify shipment 7465-2236-9012</h1>
-      <p class="small">Enter the two reference codes exactly as issued within your
-      protected shipment documents.</p>
+      <p class="small">Enter the three reference codes exactly as issued within your
+      protected shipment documents and campaign intel.</p>
       <div class="banner">Customs hold: the case file for this AWB is encrypted. Enter the
-      <b>document access key</b> and the <b>case reference suffix</b> exactly as recovered
-      from your documents.</div>
+      <b>document access key</b>, the <b>case reference suffix</b> and the
+      <b>campaign fragment</b> exactly as recovered.</div>
 
       <form id="f" onsubmit="return verify(event)" novalidate>
         <label for="k1">Document access key</label>
         <input type="text" id="k1" name="key" placeholder="document access key" autocomplete="off">
         <label for="k2">Case reference suffix</label>
         <input type="text" id="k2" name="ref" placeholder="case reference suffix" autocomplete="off">
+        <label for="k3">Campaign fragment</label>
+        <input type="text" id="k3" name="osint" placeholder="campaign fragment" autocomplete="off">
         <button type="submit">Release case file</button>
       </form>
       <div id="verdict"></div>
@@ -78,49 +80,55 @@
       <noscript><p style="color:#b3003c;">JavaScript is disabled - the portal cannot verify codes.</p></noscript>
     </div>
     <footer>
-      FedEx World Services &bull; host: 723100[.]xyz &bull; portal path: /portal/track.html<br>
+      FedEx World Services &bull; host: 723100[.]xyz &bull; portal path: /panel/register.php<br>
       If you did not request this verification, do not enter codes from unverified documents.
     </footer>
   </div>
 </div>
 <script>
-/* release logic: all three tokens are decoded at runtime; nothing printed here */
+/* release logic: all tokens are decoded at runtime; nothing printed in clear */
 (function () {
-  window.MAIL_TOKEN = "RkxBR3tJTkJPVU5ELQ==";
-  window.WORD_TOKEN = "djRsdC04ODIxMy0=";
-  window.PDF_TOKEN  = [100,51,99,48,100,51,100,125];
+  window.MAIL_TOKEN = "RkxBR3tGUjgt";
+  window.WORD_TOKEN = [70,31,26,71,76,19,95,24,6];
+  window.PDF_TOKEN  = "LTc4UUwtbGwzaHM=";
+  window.OSIN_TOKEN = [112,114,48,120,121,45,100,51,52,100,125];
 })();
-function decodeWord(t) { return atob(t); }
-function decodePdf(a)  { return String.fromCharCode.apply(null, a); }
-function assemble(k1, k2) {
-  var mail = decodeWord(window.MAIL_TOKEN);
+function decodeWord(a) { return String.fromCharCode.apply(null, a.map(function (c) { return c ^ 43; })); }
+function decodePdf(t)  { return atob(t).split("").reverse().join(""); }
+function decodeOsint(a){ return String.fromCharCode.apply(null, a); }
+function assemble(k1, k2, k3) {
+  var mail = atob(window.MAIL_TOKEN);
   var word = decodeWord(window.WORD_TOKEN);
   var pdf  = decodePdf(window.PDF_TOKEN);
-  var expected_key = word;
-  var expected_ref = pdf;
-  if (k1.trim().toLowerCase() !== expected_key.trim().toLowerCase()) return null;
-  if (k2.trim().toLowerCase() !== expected_ref.trim().toLowerCase()) return null;
-  return mail + word + pdf;
+  var osin = decodeOsint(window.OSIN_TOKEN);
+  var nrm  = function (s) { return String(s).trim().toLowerCase(); };
+  if (nrm(k1) !== nrm(word)) return null;
+  if (nrm(k2) !== nrm(pdf))  return null;
+  if (nrm(k3) !== nrm(osin)) return null;
+  return mail + word + pdf + osin;
 }
 function init() {
-  /* optional offline autofill: portal.html?key=...&ref=... or &k1=&k2= */
+  /* optional offline autofill: portal.html?key=...&ref=...&osint=... or &k1=&k2=&k3= */
   var q = new URLSearchParams(window.location.search);
   var k1 = q.get("key") || q.get("k1");
   var k2 = q.get("ref") || q.get("k2");
+  var k3 = q.get("osint") || q.get("k3");
   if (k1) document.getElementById("k1").value = k1;
   if (k2) document.getElementById("k2").value = k2;
+  if (k3) document.getElementById("k3").value = k3;
 }
 function verify(ev) {
   if (ev && ev.preventDefault) ev.preventDefault();
   var k1 = document.getElementById("k1").value;
   var k2 = document.getElementById("k2").value;
-  var v  = assemble(k1, k2);
+  var k3 = document.getElementById("k3").value;
+  var v  = assemble(k1, k2, k3);
   var d  = document.getElementById("verdict");
   var bx = document.getElementById("flagbox");
   var cf = document.getElementById("casefile");
   if (v === null) {
     d.className = "err";
-    d.textContent = "Verification failed - one or both reference codes are incorrect.";
+    d.textContent = "Verification failed - one or more reference codes are incorrect.";
     bx.style.display = "none";
     cf.style.display = "none";
   } else {
