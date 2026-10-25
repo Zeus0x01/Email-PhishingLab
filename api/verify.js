@@ -47,9 +47,10 @@ module.exports = function handler(req, res) {
   }
 
   // Digests of the reference codes (normalized to lowercase for comparison)
+  // D_OSIN = HMAC of the XWorm mutex recovered via multi-hop OSINT
   var D_KEY  = 'c19773dff874bd08eb74d0544b9d9bfa59c992bdff958ce64c6f30567f307763';
   var D_REF  = 'd9861d5e257fceeda47d3f414c447b99fd8321e2c4aa5120b8fd0299267e8d2e';
-  var D_OSIN = 'a1752c33098b5adb42999b3d1f5468242f06e7aa73e1dc5ef20dfaafaa74423f';
+  var D_OSIN = 'c0056c859e11d7c3cc47d316e14feaa04a74e5082cc31884bc75c82f069444f9';
 
   var t1 = safeEqual(mac(k1), D_KEY);
   var t2 = safeEqual(mac(k2), D_REF);
