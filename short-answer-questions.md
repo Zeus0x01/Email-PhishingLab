@@ -68,14 +68,11 @@ address only (brackets optional).
 `outbound_decoy.eml` links out to a domain outside the main campaign chain.
 Which one? Answer format: domain only.
 
-## Q15 — OSINT flag fragment (1 string)
-The pipeline token (Q7) is the campaign identifier. The OSINT step uses it to
-reveal the last fragment of the master flag. What is the exact OSINT-derived
-fragment? Answer format: exact string, including the trailing brace if present.
-Hint: your instructor explains where the token leads (public threat note /
-archive snapshot) and distributes an offline snapshot of that note with the
-instructor pack. This is the only step that cannot be completed from the
-artefacts alone.
+## Q15 — OSINT (1 string)
+Recover the campaign ID.  
+Find a matching 2025 sample.  
+Use the install filename + C2 to locate the mutex.  
+Answer format: exact mutex string.
 
 ## Q16 — Master flag (1 string)
 Open `deploy/public/index.html`, enter the three codes you recovered (the Word-doc
