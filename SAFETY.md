@@ -26,7 +26,7 @@ would.
 | `.docm` document properties | `Comments` property = base64 of a lab token | decoded and displayed inside the waybill decoy; never executed |
 | `.pdf` | OpenAction JavaScript, layered `/Filter [/ASCII85Decode /FlateDecode]` | only reconstructs strings, calls `app.alert`, never fetches the link; `/URI` annotation points at a dead host |
 | tracking pixel (`image015.png`) | real remote PNG + two `tEXt` metadata chunks | metadata strings only |
-| OSINT target (`PFX-81LQ-C554`) | unique campaign token + one public instructor note | no attacker infrastructure; the fragment lives in a note the instructor hosts/archives, not on a live panel |
+| OSINT target (campaign token) | unique campaign token recovered from artefacts | no attacker infrastructure; the OSINT step requires public threat-intelligence research |
 
 **Nothing in this lab is a functional dropper, downloader, C2 client, or
 persistence mechanism.** Every "payload" reduces to `Write-Output`-style string
@@ -42,23 +42,30 @@ a real sample — and they are listed defanged in the instructor IOC list. Rules
 
 - They are **analysis artefacts only**: never contacted, never resolved as part
   of the lab flow.
-- The lab is fully solvable **offline** — no step requires reaching any of them;
-  the artefact chain needs no network, and the single OSINT step (fragment C)
-  runs on the instructor-provided offline snapshot of a public threat note.
+- The lab is fully solvable **offline** for every step except the OSINT question
+  (Q15), which intentionally requires public research.
 - If you detonate anything anyway, do it in a **disposable VM with no outbound
   networking** and a snapshot taken.
 
 ## 4. The OSINT step
 
-Flag fragment C is derived from the campaign token `PFX-81LQ-C554`, which the
-trainee recovers from the mail headers (`X-Panel-Ref`), the pixel metadata, the
-macro (hardcoded channel + document-properties decode) and the PDF JavaScript.
-The intended OSINT path is a **public, archivable note** (instructor-hosted
-gist/blog-style "sandbox report") mentioning the token plus the fragment; an
-offline snapshot is stored with the instructor pack so the step never depends on
-private groups, credentials, or live attacker infrastructure. The token is a
-lab invention — searching it on the open internet will never reach anything the
-"attacker" controls, because none exists.
+The campaign token recovered from the mail headers (`X-Panel-Ref`), the pixel
+metadata, the macro (hardcoded channel + document-properties decode) and the PDF
+JavaScript is a **lab invention**. Searching the token itself on the open
+internet will not return a pre-packaged answer.
+
+The intended research path is multi-hop:
+
+1. Recover the campaign identifier from the artefacts.
+2. Locate a publicly documented 2025 sample that uses a nearly identical delivery
+   technique (courier / AWB / shipping-document lure + password-protected archive
+   or script dropper).
+3. From that sample’s configuration, extract the install filename and a C2.
+4. Use the install filename + C2 combination to locate the matching public
+   sandbox report and recover the mutex value.
+
+This step requires real OSINT skill and cannot be completed from the artefacts
+alone. The final answer for Q15 is the mutex string.
 
 ## 5. Build-time rules (regenerating artefacts)
 
