@@ -27,9 +27,7 @@ What password opens the attached FedEx AWB archive?
 The tracking pixel PNG has a tEXt chunk named Comment. What is its value?
 
 ## Q7 — Campaign token
-The same campaign identifier appears in the pixel Pipeline chunk, the document
-property channel, the macro stage-2, the PDF JavaScript, and X-Panel-Ref.
-What is that token?
+What is the campaign token shared across the artefacts?
 
 ## Q8 — Macro flag
 In the Word macro, the PowerShell stage-2 assigns `$flag`. What is its value?
@@ -45,8 +43,7 @@ The decoded PDF JavaScript contains a `dead2` URL. What is it?
 In the decoded PDF JavaScript, the fragments joined into `p2` form which string?
 
 ## Q12 — First hop
-In the topmost Received header (first in the file), what source IP appears in
-brackets?
+In the first Received header in the file, what source IP is in brackets?
 
 ## Q13 — Originating IP
 What is the X-Originating-IP value?
