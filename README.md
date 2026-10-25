@@ -10,12 +10,12 @@ The **IOC IPs/domains in the mail chain are real malspam entities with public re
 on sandboxes and threat-intel feeds (Open Threat Exchange / CAPE Sandbox tagged
 `142.132.180.233`, `37.0.11.227`, `104.200.23.95`) so analysts pivot on genuine
 indicators, as they would in real triage. They must **never be contacted live**;
-the artefact chain is a 100% offline exercise, and the one OSINT step points at a
-public, archival note — never at attacker infrastructure. Note that **these IOCs
-will age out of reputation feeds**: malspam infrastructure decays, verdicts drop
-off sandboxes/OTX dashboards, and blocklists expire. Treat the pivot exercise
-(Q4, Q12–Q13, Q14) as time-sensitive — if an indicator no longer appears on a
-feed, grade it from the instructor IOC list rather than re-pivoting live.
+the artefact chain is a 100% offline exercise for every step except the intentional
+OSINT research question. Note that **these IOCs will age out of reputation feeds**:
+malspam infrastructure decays, verdicts drop off sandboxes/OTX dashboards, and
+blocklists expire. Treat the pivot exercise (Q4, Q12–Q13, Q14) as time-sensitive —
+if an indicator no longer appears on a feed, grade it from the instructor IOC list
+rather than re-pivoting live.
 
 > **Do not run anything on your own workstation** — treat all samples as you would in a
 > real triage: isolated VM, snapshots off, no outbound networking.
@@ -52,9 +52,9 @@ Email-PhishingLab/
 > copies at the repository root, so Vercel can build from the repo root without
 > a Root Directory override. Keep the pairs in sync when editing.
 
-> The **instructor pack** (flag scheme, answer key, walkthrough, IOC list, OSINT
-> snapshot, decoded mail map) is NOT part of this public edition. This repo is
-> deliberately official — instructors distribute the answer key separately.
+> The **instructor pack** (flag scheme, answer key, walkthrough, IOC list) is NOT
+> part of this public edition. This repo is deliberately official — instructors
+> distribute the answer key separately.
 
 ## Learning objectives
 
@@ -67,7 +67,7 @@ Email-PhishingLab/
 * Hard PDF JavaScript analysis: two-step `/Filter [/ASCII85Decode /FlateDecode]`
   stream, fragment reassembly, red-herring separation.
 * Tracking-pixel / stego metadata extraction (two `tEXt` chunks).
-* OSINT pivot from a unique campaign token to one flag fragment.
+* Real multi-hop OSINT: campaign token → matching 2025 sample → install filename + C2 → mutex.
 * Flag-assembly: final verification portal + short-answer report.
 
 ## Prerequisites
@@ -78,6 +78,7 @@ Email-PhishingLab/
 * peepdf / pdfid / qpdf or CyberChef ("From Base85" + "Flate" / "Gunzip") for the PDF
 * CyberChef covers nearly every decode in one view (b64, RFC2047, UTF-16LE, A85)
 * A browser for the portal (offline twin works without a server)
+* Public threat-intelligence sources (sandbox reports, Triage, Joe Sandbox, etc.) for the OSINT step
 
 ## Step-by-step trainee workflow
 
@@ -97,24 +98,23 @@ Email-PhishingLab/
    decode the `<blob>` as UTF-16LE base64 → **reference code from the `$flag`
    variable (fragment 1)**. Also decode the base64 chunk the macro reads from the
    document-properties channel (and the same token in the pixel's second `tEXt`
-   chunk and in `X-Panel-Ref`) → the **campaign token** to OSINT-pivot on.
+   chunk and in `X-Panel-Ref`) → the **campaign token** used for OSINT.
 6. **PDF analysis:** pull the `/OpenAction` → `/JavaScript` stream; apply the two
    declared filters in the order they decode (base85 then inflate); reassemble the
    split fragments that `s4()` joins into `p2` → **reference code (fragment 2)**.
    Split off the red-herring `dead2` URL from the real IOC.
 7. **Tracking pixel:** decode the PNG's two `tEXt` chunks (Comment = **fragment 0**;
    Pipeline = the campaign token again — confirming the OSINT target).
-8. **OSINT step:** use the campaign token to find the public threat note about this
-   campaign (your instructor documents how the token is published/archived and
-   distributes an offline snapshot of the note with the instructor pack).
-   This is the **only step that is not solvable from the artefacts alone** —
-   solo trainees need the instructor's snapshot (or access to the public
-   archive); without it Q15 cannot be answered. The note contains
-   **fragment C**.
+8. **OSINT step (Q15):** recover the campaign ID, then perform real research:
+   - Find a publicly documented 2025 sample that uses a nearly identical delivery
+     chain (courier / AWB / shipping-document lure).
+   - From that sample extract the install filename and a C2.
+   - Use the install filename + C2 combination to locate the matching public
+     sandbox report and recover the **mutex** (this is the OSINT answer).
 9. **Verification portal:** open `deploy/public/index.html` (or the offline twin)
-   and enter fragment 1, fragment 2 and fragment C. The portal assembles and
-   releases the master flag. URL autofill: `?key=...&ref=...&osint=...`.
-10. Write your incident report — see `short-answer-questions.md` (16 + 4 bonus).
+   and enter fragment 1, fragment 2 and the OSINT-derived value. The portal
+   assembles and releases the master flag. URL autofill: `?key=...&ref=...&osint=...`.
+10. Write your incident report — see `short-answer-questions.md` (16 + 5 bonus).
 
 ## Lab time budget
 
@@ -125,10 +125,10 @@ Email-PhishingLab/
 | Macro chain + stage-2 decode | 35 |
 | Pixel metadata | 10 |
 | PDF two-filter JS decode | 30 |
-| OSINT pivot (fragment C) | 15 |
+| OSINT research (mutex) | 25–40 |
 | Portal verification + flag assembly | 10 |
 | Write-up (short answers) | 20 |
-| **Total** | **~150** |
+| **Total** | **~160–175** |
 
 ## Tooling suggestions
 
@@ -139,6 +139,7 @@ Email-PhishingLab/
 * CyberChef — b64 / RFC2047 / UTF-16LE / From Base85 / Inflate in one pipeline.
 * `pngcheck -v` / CyberChef "Extract Files" — PNG chunk dump.
 * 7-Zip — password-protected archive.
+* Public sandbox platforms (Triage, Joe Sandbox, Any.Run, etc.) for the OSINT hop.
 
 ## SHA256 (key artefacts, as shipped)
 
@@ -161,5 +162,5 @@ Email-PhishingLab/
 * No live malware, no working droppers, no C2 callbacks, no persistence, no destructive actions.
 * The VBA `-enc` stage-2 only *reconstructs strings* and `Write-Output`s one of them; never executes downloads, drops files, or touches the registry/network.
 * The PDF JavaScript only re-assembles strings and shows an alert; its `/URI` annotation is never fetched.
-* All network indicators are offline-analysis-only; the OSINT fragment lives in a public/archivable instructor note, not on attacker infrastructure.
+* All network indicators are offline-analysis-only; the OSINT step requires public research and does not contact any attacker infrastructure.
 * `deploy/public/index.html` sends the three codes to the serverless `/api/verify` endpoint for checking (the page itself embeds no answer tokens); the offline twin `artifacts/web/FedEx_Tracking_Portal.html` is local JS only and never contacts the network.
