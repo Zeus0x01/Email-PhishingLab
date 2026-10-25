@@ -1,108 +1,89 @@
 # short-answer-questions.md
 
-One line per question — a single short, exact answer (IP / URL / header / string).
-No explanations. Case-insensitive; leading/trailing spaces ignored.
-Format hint in parentheses on each line.
+One short answer per question (IP / URL / header / string / hash).
+Case-insensitive. Leading and trailing spaces ignored.
 
-## Q1 — Subject (1 string)
-Decode the RFC 2047 `Subject` header of `mail/eml/inbound_message.eml`.
-Answer format: exact decoded subject text.
-
-## Q2 — Reply-To address (1 email address)
-What is the exact `Reply-To` (and identical `Resent-Reply-To`) address in
-`inbound_message.eml`? Answer format: full email address.
-
-## Q3 — Envelope domain (1 domain)
-Which domain does the `Return-Path`/`From` envelope use (the part after `@`)?
-Answer format: domain only.
-
-## Q4 — X-Beacon-Ref URL (1 URL)
-`X-Beacon-Ref:` is a base64-wrapped value. What is the exact decoded URL?
-Answer format: full URL, no trailing spaces.
-
-## Q5 — ZIP password (1 token)
-What is the password protecting the attached archive `FedEx_AWB_7465-2236-9012.zip`?
-Answer format: password only.
-
-## Q6 — Pixel flag part 0 (1 string)
-Decode the inline `image015.png` MIME part; a `tEXt` chunk keyed `Comment` carries
-flag part 0. What is the exact string? Answer format: exact chunk value, including
-the trailing hyphen if present.
-
-## Q7 — Pipeline token (1 token)
-A second `tEXt` chunk (`Pipeline`), the base64 `Comments` property / hardcoded
-channel inside the `.docm`, the decoded PowerShell stage-2, the decoded PDF JS and
-the `X-Panel-Ref` header all reveal the same unique campaign identifier. What is it?
-Answer format: exact token.
-
-## Q8 — Macro reference code (1 string)
-Inside `FedEx_WayBill_7465-2236-9012.docm`, the VBA `-enc` PowerShell blob decodes
-(UTF-16LE) to a small payload whose first line assigns `$flag`. What is the exact
-decoded value? Answer format: exact string, including the trailing hyphen.
-
-## Q9 — PDF filter chain (2 tokens in order)
-The `/OpenAction` of `FedEx_WayBill_7465-2236-9012.pdf` points to a stream with a
-TWO-step `/Filter [ ... ]`. Name BOTH filters in the order they are applied when
-decoding the stream. Answer format: comma-separated tokens, e.g. `A, B`.
-
-## Q10 — Red-herring URL (1 URL)
-The decoded PDF JavaScript contains a `dead2` string — a URL an analyst might
-mistake for the real beacon. What is the exact URL? Answer format: full URL.
-
-## Q11 — PDF flag part 2 (1 string)
-Assemble the fragments concatenated inside `q2` of the decoded PDF JavaScript
-(the `s4` function joins them into `p2`). What is the exact value? Answer format:
-exact string, including the trailing hyphen.
-
-## Q12 — First hop IP (1 IP)
-The **topmost** `Received:` header — the first one in the file, i.e. the line at
-the very top of the header block, added last by the recipient-side hop — mentions
-a source server IP in brackets. The lower `Received:` hops list other IPs; only
-the topmost header counts. What is it? Answer format: IPv4 address only.
-
-## Q13 — Originating IP (1 IP)
-What is the value of the `X-Originating-IP:` header? Answer format: IPv4
-address only (brackets optional).
-
-## Q14 — Decoy domain (1 domain)
-`outbound_decoy.eml` links out to a domain outside the main campaign chain.
-Which one? Answer format: domain only.
-
-## Q15 — OSINT (1 string)
-Recover the campaign ID.  
-Find a matching 2025 sample.  
-Use the install filename + C2 to locate the mutex.  
-Answer format: exact mutex string.
-
-## Q16 — Master flag (1 string)
-Open `deploy/public/index.html`, enter the three codes you recovered (the Word-doc
-key from Q8, the PDF fragment from Q11 and the OSINT fragment from Q15). What exact
-string does the portal release? Answer format: the assembled master flag.
-Worth double points.
+All artefacts needed are in the lab package you downloaded. No external
+repo paths are required.
 
 ---
 
-## Bonus questions (extra credit)
+## Q1 — Subject
+What is the decoded Subject of the inbound message?
 
-## Q17 — DKIM domain (1 domain)
-The `DKIM-Signature:` line carries `d=...`. Which signing domain is claimed?
-Answer format: domain only.
+## Q2 — Reply-To
+What is the exact Reply-To address?
 
-## Q18 — X-Mailer (1 string)
-What is the exact `X-Mailer:` header value? Answer format: exact string.
+## Q3 — Envelope domain
+What domain appears after `@` in the Return-Path / From envelope?
 
-## Q19 — Message-ID host (1 domain)
-The `Message-ID:` right-hand side (after `@`) belongs to which host?
-Answer format: host/domain only.
+## Q4 — Beacon URL
+The X-Beacon-Ref header is base64-encoded. What is the decoded URL?
 
-## Q20 — Attachment SHA256 (1 hash)
-What is the SHA256 of the password-protected archive `FedEx_AWB_7465-2236-9012.zip`
-(the file as distributed in `artifacts/archived/`, not the hash of its inner
-members)? Answer format: full lowercase hex hash.
+## Q5 — Archive password
+What password opens the attached FedEx AWB archive?
 
-## Q21 — Document author metadata (1 string)
-Real triage checks OOXML metadata hygiene. Open `docProps/core.xml` inside the
-docm package (7-Zip / CyberChef "Extract Files" — no Office needed): the
-`dc:creator` and `cp:lastModifiedBy` properties record the same author name,
-with creation/modification timestamps. What is the exact name recorded?
-Answer format: exact name as stored in `core.xml`.
+## Q6 — Pixel Comment
+The tracking pixel PNG has a tEXt chunk named Comment. What is its value?
+
+## Q7 — Campaign token
+The same campaign identifier appears in the pixel Pipeline chunk, the document
+property channel, the macro stage-2, the PDF JavaScript, and X-Panel-Ref.
+What is that token?
+
+## Q8 — Macro flag
+In the Word macro, the PowerShell stage-2 assigns `$flag`. What is its value?
+
+## Q9 — PDF filters
+The PDF OpenAction stream uses a two-step filter chain. Name both filters in
+the order they are applied when decoding. Format: `A, B`
+
+## Q10 — Decoy URL
+The decoded PDF JavaScript contains a `dead2` URL. What is it?
+
+## Q11 — PDF fragment
+In the decoded PDF JavaScript, the fragments joined into `p2` form which string?
+
+## Q12 — First hop
+In the topmost Received header (first in the file), what source IP appears in
+brackets?
+
+## Q13 — Originating IP
+What is the X-Originating-IP value?
+
+## Q14 — Decoy domain
+The outbound decoy message links to a domain outside the main chain. Which domain?
+
+## Q15 — OSINT
+Recover the campaign ID.
+Find a matching 2025 sample.
+Use the install filename + C2 to locate the mutex.
+
+## Q16 — Master flag
+Assemble the master flag from:
+- the macro flag (Q8)
+- the PDF fragment (Q11)
+- the OSINT answer (Q15)
+
+Format starts with `FLAG{FR8-` followed by those three values in order.
+
+---
+
+## Bonus
+
+## Q17 — DKIM domain
+In the DKIM-Signature header, what is the value of `d=`?
+
+## Q18 — X-Mailer
+What is the exact X-Mailer header value?
+
+## Q19 — Message-ID host
+In Message-ID, what host appears after `@`?
+
+## Q20 — Archive hash
+What is the SHA256 of the password-protected FedEx AWB zip (the archive file
+itself, not its contents)?
+
+## Q21 — Document author
+Inside the Word document package, what author name is recorded in the core
+metadata (`dc:creator` / `cp:lastModifiedBy`)?
